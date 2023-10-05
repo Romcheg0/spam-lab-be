@@ -1,6 +1,7 @@
 const express = require("express");
 const mysql = require('mysql2')
 const nodemailer = require('nodemailer')
+const cors = require('cors')
 require("dotenv").config()
 
 let transporter
@@ -31,6 +32,7 @@ connection.connect()
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 const port = 3000
 
 app.get('/users', (req, res) => {
@@ -44,7 +46,7 @@ app.get('/users', (req, res) => {
 
 app.post('/users/:userId', (req, res) => {
   connection.query(`INSERT INTO users (last_name, first_name, patronymic, email) VALUES (
-    "${req.body.last_name}", "${req.body.first_name}", ${req.body.patronymic ? `${req.body.patronymic}` : "NULL"}, "${req.body.email}"
+    "${req.body.last_name}", "${req.body.first_name}", ${req.body.patronymic ? `"${req.body.patronymic}"` : "NULL"}, "${req.body.email}"
     )
   `, (err, result) => {
     res.send(err || result)
@@ -76,7 +78,7 @@ app.delete('/users/:userId', (req, res) => {
   })
 })
 
-app.post('/mailTo/:userId', (req, res) => {
+app.post('/mailTo', (req, res) => {
   transporter.sendMail({
     from: process.env.FROM,
     to: req.body.to,
